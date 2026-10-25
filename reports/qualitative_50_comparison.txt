@@ -1,0 +1,55 @@
+Idx | Ground Truth       | Raw CRNN           | Final Decoder      | Match?
+----------------------------------------------------------------------------
+  1 | PRIVATE            | PRIATE             | PRIVATE            | YES (EXACT)
+  2 | PARKING            | PARKING            | PARKING            | YES (EXACT)
+  3 | SALUTES            | SALUTES            | SALUTES            | YES (EXACT)
+  4 | DOLCE              | DOLCE              | DOLCE              | YES (EXACT)
+  5 | GABBANA            | CEEANA             | CEEANA             | NO
+  6 | REGENCY            | IETT               | IETT               | NO
+  7 | STATE              | STE                | STE                | NO
+  8 | BANK               | EANK               | BANK               | YES (EXACT)
+  9 | OF                 | OF                 | OF                 | YES (EXACT)
+ 10 | INDIA              | INIT               | INIT               | NO
+ 11 | KINGFISHER         | KNISTER            | KEISTER            | NO
+ 12 | CLEAR              | CLEAR              | CLEAR              | YES (EXACT)
+ 13 | CHANNEL            | CHANNEE            | CHANNEL            | YES (EXACT)
+ 14 | UNIVERSAL          | UNVERSAL           | UNIVERSAL          | YES (EXACT)
+ 15 | STUDIOS            | STUIOS             | STUDIOS            | YES (EXACT)
+ 16 | HOLLYWOOD          | HLYWWOOP           | HLYWWOOP           | NO
+ 17 | COM                | COM                | COM                | YES (EXACT)
+ 18 | LOAN               | LOAN               | LOAN               | YES (EXACT)
+ 19 | THAT               | THAT               | THAT               | YES (EXACT)
+ 20 | HOME               | HOME               | HOME               | YES (EXACT)
+ 21 | LOANS              | LOANS              | LOANS              | YES (EXACT)
+ 22 | JAMMU              | JAINU              | JAINU              | NO
+ 23 | 41KM               | KKM                | KKM                | NO
+ 24 | 83KM               | 3KM                | 3KM                | NO
+ 25 | VISIT              | VISIT              | VISIT              | YES (EXACT)
+ 26 | AGAIN              | AGAIN              | AGAIN              | YES (EXACT)
+ 27 | YOU                | YOU                | YOU                | YES (EXACT)
+ 28 | HAPPY              | HAPPY              | HAPPY              | YES (EXACT)
+ 29 | JOURNEY            | JURNEY             | JOURNEY            | YES (EXACT)
+ 30 | STATE              | TE                 | TE                 | NO
+ 31 | BANK               | ALDS               | ALDS               | NO
+ 32 | OF                 | 7F                 | 7F                 | NO
+ 33 | INDIA              | TDIA               | TDIA               | NO
+ 34 | SBI                | SL                 | SL                 | NO
+ 35 | VISA               | WSA                | VISA               | YES (EXACT)
+ 36 | PLATINUM           | KKTA               | KKTA               | NO
+ 37 | 4865               | T6EG               | T6EG               | NO
+ 38 | 4567               | W5T                | W5T                | NO
+ 39 | 1212               | 134                | 134                | NO
+ 40 | VIJAY              | WTAY               | WTAY               | NO
+ 41 | GYPSY              | CBSY               | CBSY               | NO
+ 42 | 05                 | OS                 | OS                 | NO
+ 43 | STATE              | STATE              | STATE              | YES (EXACT)
+ 44 | BANK               | BANK               | BANK               | YES (EXACT)
+ 45 | OF                 | OF                 | OF                 | YES (EXACT)
+ 46 | LABBIPET           | LAEEITGT           | LAEEITGT           | NO
+ 47 | VIJAYAWADA         | WWATAR             | WWATAR             | NO
+ 48 | GRUHA              | SS                 | SS                 | NO
+ 49 | GAMYA              | GGG                | GGG                | NO
+ 50 | ALDO               | ALD                | ALD                | NO
+============================================================================
+Raw CRNN Matches   : 17/50 (34.0%)
+Final Decoder Matches: 24/50 (48.0%)

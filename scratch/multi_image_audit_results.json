@@ -1,0 +1,99 @@
+[
+  {
+    "name": "Invoice Image 1",
+    "path": "sample\\invoice_test.png",
+    "dimensions": "1024x682",
+    "detected_boxes": 107,
+    "max_box_area_ratio": 0.0097,
+    "border_suppression_pass": true,
+    "redaction_metrics": {
+      "avg_stroke_reduction_pct": 100.0,
+      "total_boxes_evaluated": 107,
+      "perfectly_cleared_pct": 100.0
+    },
+    "latency_ms": 11973.51,
+    "saved_json": "sample\\invoice_test_text.json",
+    "saved_redacted": "sample\\invoice_test_redacted.png",
+    "sample_transcriptions": [
+      "AGC",
+      "TECHNOLOGIES",
+      "PT",
+      "M",
+      "LD",
+      "A",
+      "INVOICE",
+      "13"
+    ]
+  },
+  {
+    "name": "Invoice Image 2",
+    "path": "sample\\invoice_sample_2.png",
+    "dimensions": "969x553",
+    "detected_boxes": 166,
+    "max_box_area_ratio": 0.0337,
+    "border_suppression_pass": true,
+    "redaction_metrics": {
+      "avg_stroke_reduction_pct": 78.05,
+      "total_boxes_evaluated": 166,
+      "perfectly_cleared_pct": 48.8
+    },
+    "latency_ms": 13004.48,
+    "saved_json": "sample\\invoice_sample_2_text.json",
+    "saved_redacted": "sample\\invoice_sample_2_redacted.png",
+    "sample_transcriptions": [
+      "6",
+      "MIETIEPESTRITEODICHIS",
+      "B",
+      "MPORTISTECKIEDINE",
+      "SEESGGEEGDTIR",
+      "AC",
+      "KHNOOE",
+      "P"
+    ]
+  },
+  {
+    "name": "IIIT-5K Sample",
+    "path": "IIIT5K-Word_V3.0\\IIIT5K\\test\\1002_2.png",
+    "dimensions": "221x49",
+    "detected_boxes": 1,
+    "max_box_area_ratio": 1.0,
+    "border_suppression_pass": false,
+    "redaction_metrics": {
+      "avg_stroke_reduction_pct": 0.0,
+      "total_boxes_evaluated": 1,
+      "perfectly_cleared_pct": 0.0
+    },
+    "latency_ms": 32.76,
+    "saved_json": "IIIT5K-Word_V3.0\\IIIT5K\\test\\1002_2_text.json",
+    "saved_redacted": "IIIT5K-Word_V3.0\\IIIT5K\\test\\1002_2_redacted.png",
+    "sample_transcriptions": [
+      "PARING"
+    ]
+  },
+  {
+    "name": "Document Sample",
+    "path": "sample\\document_sample.png",
+    "dimensions": "600x300",
+    "detected_boxes": 8,
+    "max_box_area_ratio": 0.0192,
+    "border_suppression_pass": true,
+    "redaction_metrics": {
+      "avg_stroke_reduction_pct": 100.0,
+      "total_boxes_evaluated": 8,
+      "perfectly_cleared_pct": 100.0
+    },
+    "latency_ms": 585.57,
+    "saved_json": "sample\\document_sample_text.json",
+    "saved_redacted": "sample\\document_sample_redacted.png",
+    "sample_transcriptions": [
+      "INVOICE",
+      "CONFIDENTIAL",
+      "ACCOUNT",
+      "337654",
+      "BALANCE",
+      "50000",
+      "STATUS",
+      "VERIFIED"
+    ]
+  }
+]

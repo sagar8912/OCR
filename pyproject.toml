@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ocr-text-redaction"
+version = "1.0.0"
+description = "CPU-optimized Optical Character Recognition and Inpainting-based Text Redaction Engine"
+authors = [{ name = "ML Engineering Team" }]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.0.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "pillow>=9.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0",
+    "python-multipart>=0.0.6",
+    "rapidfuzz>=3.0.0",
+    "httpx>=0.23.0",
+    "pytest>=7.0.0"
+]
+
+[project.scripts]
+textrecognizer = "src.cli.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

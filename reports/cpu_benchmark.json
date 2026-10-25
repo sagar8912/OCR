@@ -1,0 +1,63 @@
+{
+    "hardware": {
+        "device": "cpu",
+        "cpu_cores": 4,
+        "pytorch_threads": 4
+    },
+    "model_footprint": {
+        "baseline_checkpoint_mb": 63.76,
+        "quantized_checkpoint_mb": 18.24,
+        "size_reduction_pct": 71.4
+    },
+    "single_item_batch_1": {
+        "baseline_ms": 37.94,
+        "quantized_ms": 79.86,
+        "speedup_ratio": 0.48,
+        "baseline_throughput_items_per_sec": 26.35,
+        "quantized_throughput_items_per_sec": 12.52
+    },
+    "batched_batch_16": {
+        "baseline_batch_ms": 602.57,
+        "quantized_batch_ms": 540.48,
+        "baseline_per_item_ms": 37.66,
+        "quantized_per_item_ms": 33.78,
+        "throughput_items_per_sec": 29.6
+    },
+    "accuracy_comparison": {
+        "eval_samples": 100,
+        "baseline": {
+            "num_samples": 100,
+            "exact_matches": 8,
+            "word_accuracy_pct": 8.0,
+            "total_edit_distance": 343,
+            "avg_edit_distance": 3.43,
+            "character_error_rate_pct": 59.34,
+            "character_precision_pct": 59.85,
+            "character_recall_pct": 42.04,
+            "character_f1_pct": 49.39,
+            "total_inference_time_sec": 0.0,
+            "avg_latency_ms_per_sample": 0.0
+        },
+        "quantized": {
+            "num_samples": 100,
+            "exact_matches": 8,
+            "word_accuracy_pct": 8.0,
+            "total_edit_distance": 344,
+            "avg_edit_distance": 3.44,
+            "character_error_rate_pct": 59.52,
+            "character_precision_pct": 59.61,
+            "character_recall_pct": 41.87,
+            "character_f1_pct": 49.19,
+            "total_inference_time_sec": 0.0,
+            "avg_latency_ms_per_sample": 0.0
+        }
+    },
+    "pipeline_breakdown": {
+        "preprocessing_ms": 6.5,
+        "detection_ms": 18.76,
+        "recognition_ms": 240.33,
+        "redaction_ms": 168.99,
+        "total_ms": 434.58,
+        "detected_regions": 8
+    }
+}

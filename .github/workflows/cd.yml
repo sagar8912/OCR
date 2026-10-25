@@ -1,0 +1,133 @@
+name: CD - Deploy OCR Engine to Azure Container Apps
+
+on:
+  workflow_run:
+    workflows: ["CI - OCR & Machine Learning Pipeline"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Target deployment environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+          - staging
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # Required for Azure OpenID Connect (OIDC) federated token exchange
+  contents: read
+  packages: write # For publishing Docker images to GitHub Container Registry (GHCR)
+
+jobs:
+  pre-deploy-check:
+    name: Verify CI Gate & Deployment Configuration
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      azure_configured: ${{ steps.check-secrets.outputs.configured }}
+    steps:
+      - name: Validate Deployment Prerequisites
+        id: check-secrets
+        run: |
+          echo "Verifying Azure deployment configuration and secrets..."
+          if [ -n "${{ secrets.AZURE_CLIENT_ID }}" ] && [ -n "${{ secrets.AZURE_TENANT_ID }}" ] && [ -n "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "Azure OIDC federated credentials detected."
+          elif [ -n "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "Azure Service Principal credentials detected."
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Azure authentication credentials (AZURE_CLIENT_ID or AZURE_CREDENTIALS) are not yet configured in GitHub Secrets."
+            echo "To complete live automated cloud deployment, configure the Azure secrets outlined in the project documentation."
+          fi
+
+  build-and-publish-image:
+    name: Build & Push Production Container Image
+    needs: pre-deploy-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short,prefix=sha-
+            type=ref,event=branch
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-to-azure:
+    name: Deploy to Azure Container Apps
+    needs: [pre-deploy-check, build-and-publish-image]
+    if: needs.pre-deploy-check.outputs.azure_configured == 'true'
+    environment:
+      name: production
+      url: ${{ steps.deploy-aca.outputs.app-url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Authenticate to Azure via OpenID Connect (OIDC)
+        if: "${{ secrets.AZURE_CLIENT_ID != '' }}"
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Authenticate to Azure via Service Principal (Fallback)
+        if: "${{ secrets.AZURE_CLIENT_ID == '' && secrets.AZURE_CREDENTIALS != '' }}"
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Container App to Azure
+        id: deploy-aca
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          imageToDeploy: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+          containerAppName: ${{ vars.AZURE_CONTAINER_APP_NAME || 'ocr-redaction-engine' }}
+          resourceGroup: ${{ vars.AZURE_RESOURCE_GROUP || 'rg-ocr-production' }}
+          targetPort: 8000
+
+      - name: Verify Live Service Health
+        run: |
+          APP_URL="${{ steps.deploy-aca.outputs.app-url }}"
+          echo "Probing container health at: ${APP_URL}/health"
+          curl --fail --retry 5 --retry-delay 10 --retry-connrefused "${APP_URL}/health" || exit 1
+          echo "OCR & Text Redaction Engine deployed and healthy on Azure."

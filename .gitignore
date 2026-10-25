@@ -1,0 +1,47 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyTorch checkpoints / artifacts (except best model if tracked)
+*.pth
+*.pt
+!models/best_model.pt
+checkpoints/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Output artifacts from runs
+*_text.json
+*_redacted.png
+test_output/
+runs/
+.DS_Store
+Thumbs.db
+
+# Large dataset archives & training data (keep repository lean)
+*.zip
+*.csv
+IIIT5K-Word_V3.0/
+
+# Environment, secrets & IDE
+.env*
+*.pem
+*.key
+.vscode/
+.idea/

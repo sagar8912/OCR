@@ -1,0 +1,13 @@
+{
+    "num_samples": 3000,
+    "exact_matches": 1017,
+    "word_accuracy_pct": 33.9,
+    "total_edit_distance": 5157,
+    "avg_edit_distance": 1.719,
+    "character_error_rate_pct": 33.77,
+    "character_precision_pct": 78.3,
+    "character_recall_pct": 67.57,
+    "character_f1_pct": 72.54,
+    "total_inference_time_sec": 93.8554,
+    "avg_latency_ms_per_sample": 31.29
+}

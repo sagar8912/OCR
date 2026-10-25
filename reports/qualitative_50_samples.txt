@@ -1,0 +1,54 @@
+Idx | Ground Truth       | Prediction         | Match? | Edit Dist
+-----------------------------------------------------------------
+  1 | PRIVATE            | PRIATE             | NO     | 1
+  2 | PARKING            | PARKING            | YES    | 0
+  3 | SALUTES            | SALUTES            | YES    | 0
+  4 | DOLCE              | DOLCE              | YES    | 0
+  5 | GABBANA            | CEEANA             | NO     | 4
+  6 | REGENCY            | IETT               | NO     | 6
+  7 | STATE              | STE                | NO     | 2
+  8 | BANK               | EANK               | NO     | 1
+  9 | OF                 | OF                 | YES    | 0
+ 10 | INDIA              | INIT               | NO     | 2
+ 11 | KINGFISHER         | KNISTER            | NO     | 4
+ 12 | CLEAR              | CLEAR              | YES    | 0
+ 13 | CHANNEL            | CHANNEE            | NO     | 1
+ 14 | UNIVERSAL          | UNVERSAL           | NO     | 1
+ 15 | STUDIOS            | STUIOS             | NO     | 1
+ 16 | HOLLYWOOD          | HLYWWOOP           | NO     | 4
+ 17 | COM                | COM                | YES    | 0
+ 18 | LOAN               | LOAN               | YES    | 0
+ 19 | THAT               | THAT               | YES    | 0
+ 20 | HOME               | HOME               | YES    | 0
+ 21 | LOANS              | LOANS              | YES    | 0
+ 22 | JAMMU              | JAINU              | NO     | 2
+ 23 | 41KM               | KKM                | NO     | 2
+ 24 | 83KM               | 3KM                | NO     | 1
+ 25 | VISIT              | VISIT              | YES    | 0
+ 26 | AGAIN              | AGAIN              | YES    | 0
+ 27 | YOU                | YOU                | YES    | 0
+ 28 | HAPPY              | HAPPY              | YES    | 0
+ 29 | JOURNEY            | JURNEY             | NO     | 1
+ 30 | STATE              | TE                 | NO     | 3
+ 31 | BANK               | ALDS               | NO     | 4
+ 32 | OF                 | 7F                 | NO     | 1
+ 33 | INDIA              | TDIA               | NO     | 2
+ 34 | SBI                | SL                 | NO     | 2
+ 35 | VISA               | WSA                | NO     | 2
+ 36 | PLATINUM           | KKTA               | NO     | 7
+ 37 | 4865               | T6EG               | NO     | 4
+ 38 | 4567               | W5T                | NO     | 3
+ 39 | 1212               | 134                | NO     | 3
+ 40 | VIJAY              | WTAY               | NO     | 3
+ 41 | GYPSY              | CBSY               | NO     | 3
+ 42 | 05                 | OS                 | NO     | 2
+ 43 | STATE              | STATE              | YES    | 0
+ 44 | BANK               | BANK               | YES    | 0
+ 45 | OF                 | OF                 | YES    | 0
+ 46 | LABBIPET           | LAEEITGT           | NO     | 4
+ 47 | VIJAYAWADA         | WWATAR             | NO     | 8
+ 48 | GRUHA              | SS                 | NO     | 5
+ 49 | GAMYA              | GGG                | NO     | 4
+ 50 | ALDO               | ALD                | NO     | 1
+=================================================================
+Exact Matches: 17/50 (34.0%)

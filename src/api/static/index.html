@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR & Text Redaction Engine — Interactive Visual Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 24, 38, 0.75);
+      --bg-card-hover: rgba(26, 34, 54, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(99, 102, 241, 0.35);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.25);
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.10) 0%, transparent 40%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      backdrop-filter: blur(16px);
+      background: rgba(9, 13, 22, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      padding: 18px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tag {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .badge-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.15); }
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1480px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 24px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: rgba(255, 255, 255, 0.015);
+      margin-bottom: 18px;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+      box-shadow: 0 0 24px rgba(99, 102, 241, 0.15);
+    }
+
+    .dropzone-icon {
+      font-size: 38px;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .dropzone-text {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .dropzone-subtext {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      margin-top: 10px;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Preset buttons */
+    .presets-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin: 16px 0 8px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .preset-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .preset-chip:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--primary);
+    }
+
+    /* Right Column (Viewer + Output) */
+    .viewer-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Viewport Tabs */
+    .tabs-bar {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.35);
+      color: #818cf8;
+    }
+
+    /* Image Display Area */
+    .image-viewport {
+      background: #06090f;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      min-height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 16px;
+    }
+
+    .canvas-container {
+      position: relative;
+      max-width: 100%;
+      max-height: 520px;
+      display: inline-block;
+    }
+
+    .canvas-container img {
+      display: block;
+      max-width: 100%;
+      max-height: 520px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    /* Bounding Box Overlays */
+    .bbox-overlay {
+      position: absolute;
+      border: 2px solid var(--accent);
+      background: rgba(6, 182, 212, 0.18);
+      border-radius: 3px;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+    }
+
+    .bbox-overlay:hover, .bbox-overlay.highlight {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.3);
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.8);
+      z-index: 10;
+    }
+
+    .bbox-label {
+      position: absolute;
+      bottom: 100%;
+      left: -2px;
+      background: rgba(9, 13, 22, 0.95);
+      border: 1px solid var(--accent);
+      color: #67e8f9;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px 3px 0 0;
+      white-space: nowrap;
+      pointer-events: none;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .bbox-overlay.highlight .bbox-label {
+      border-color: #f59e0b;
+      color: #fde047;
+    }
+
+    /* Metrics Bar */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+    }
+
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* Words Table */
+    .words-list {
+      max-height: 240px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+    }
+
+    .word-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.9rem;
+      transition: background 0.15s ease;
+      cursor: pointer;
+    }
+
+    .word-row:last-child {
+      border-bottom: none;
+    }
+
+    .word-row:hover, .word-row.active {
+      background: rgba(99, 102, 241, 0.12);
+    }
+
+    .word-tag {
+      font-weight: 700;
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .bbox-coords {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* JSON Output Area */
+    .json-box {
+      background: #05080e;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      max-height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      color: var(--text-muted);
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M9 12h6M12 9v6"/>
+        </svg>
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="brand-title">OCR & Redaction Studio</span>
+          <span class="brand-tag">CPU Engine</span>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted);">CRNN + CTC Sequence Recognition & OpenCV Inpainting</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="badge-status" id="healthBadge">
+        <span class="status-dot"></span>
+        <span id="healthText">CPU Model Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Column: Controls & Upload -->
+    <div class="controls-column" style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Input Image
+        </h2>
+
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">📁</div>
+          <div class="dropzone-text">Drop PNG image here</div>
+          <div class="dropzone-subtext">or click to browse files</div>
+          <input type="file" id="fileInput" accept="image/png,image/jpeg" style="display: none;">
+        </div>
+
+        <button class="btn btn-primary" id="processBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Run OCR & Redaction
+        </button>
+
+        <div class="presets-label">Quick Demo Presets</div>
+        <div class="preset-group">
+          <div class="preset-chip" id="loadDocumentSample">
+            <span>📄 Financial Document Sample</span>
+            <span style="color: var(--primary); font-size: 0.75rem;">Load</span>
+          </div>
+          <div class="preset-chip" id="loadWordSample">
+            <span>🏷️ IIIT-5K Cropped Word (PARKING)</span>
+            <span style="color: var(--primary); font-size: 0.75rem;">Load</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Performance Stats -->
+      <div class="card" id="statsCard" style="display: none;">
+        <h2 class="card-title">⚡ Execution Metrics</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="statWords">0</div>
+            <div class="metric-label">Words Detected</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="statLatency">0 ms</div>
+            <div class="metric-label">CPU Latency</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Visualizer -->
+    <div class="viewer-column">
+      <div class="card">
+        <div class="tabs-bar">
+          <button class="tab-btn active" id="tabDetected">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Interactive Detection & Bounding Boxes
+          </button>
+          <button class="tab-btn" id="tabRedacted">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+            Inpainting-Redacted Image
+          </button>
+        </div>
+
+        <div class="image-viewport" id="viewport">
+          <div class="empty-state" id="emptyPlaceholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.6;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div>Upload a PNG or select a demo sample to visualize OCR bounding boxes and inpainting redaction.</div>
+          </div>
+          <div class="canvas-container" id="canvasContainer" style="display: none;">
+            <img id="mainImage" alt="Target Image">
+            <div id="overlaysContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detected Words & JSON Output -->
+      <div class="card" id="resultsCard" style="display: none;">
+        <h2 class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Transcribed Words (Reading Order)
+        </h2>
+
+        <div class="words-list" id="wordsList"></div>
+
+        <div style="margin: 16px 0 8px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">JSON Output (Required [top, left, bottom, right] schema)</span>
+          <button class="btn btn-secondary" id="copyJsonBtn" style="width: auto; padding: 4px 12px; margin: 0; font-size: 0.75rem;">Copy JSON</button>
+        </div>
+        <div class="json-box" id="jsonDisplay">[]</div>
+
+        <div class="footer-actions" style="margin-top: 16px;">
+          <button class="btn btn-secondary" id="downloadJsonBtn">⬇️ Download image_text.json</button>
+          <button class="btn btn-secondary" id="downloadRedactedBtn">⬇️ Download image_redacted.png</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // State
+    let currentFile = null;
+    let originalImageSrc = null;
+    let redactedImageSrc = null;
+    let currentResults = [];
+    let currentView = 'detected'; // 'detected' | 'redacted'
+    let currentFilenameStem = 'image';
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const processBtn = document.getElementById('processBtn');
+    const emptyPlaceholder = document.getElementById('emptyPlaceholder');
+    const canvasContainer = document.getElementById('canvasContainer');
+    const mainImage = document.getElementById('mainImage');
+    const overlaysContainer = document.getElementById('overlaysContainer');
+    const statsCard = document.getElementById('statsCard');
+    const resultsCard = document.getElementById('resultsCard');
+    const statWords = document.getElementById('statWords');
+    const statLatency = document.getElementById('statLatency');
+    const wordsList = document.getElementById('wordsList');
+    const jsonDisplay = document.getElementById('jsonDisplay');
+
+    // Tabs
+    const tabDetected = document.getElementById('tabDetected');
+    const tabRedacted = document.getElementById('tabRedacted');
+
+    // Preset buttons
+    const loadDocumentSample = document.getElementById('loadDocumentSample');
+    const loadWordSample = document.getElementById('loadWordSample');
+
+    // Downloads & Copy
+    const copyJsonBtn = document.getElementById('copyJsonBtn');
+    const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+    const downloadRedactedBtn = document.getElementById('downloadRedactedBtn');
+
+    // Dropzone Events
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFileSelect(e.target.files[0]);
+      }
+    });
+
+    function handleFileSelect(file) {
+      currentFile = file;
+      currentFilenameStem = file.name.replace(/\.[^/.]+$/, "");
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        originalImageSrc = e.target.result;
+        redactedImageSrc = null;
+        displayOriginalImage();
+        processBtn.disabled = false;
+        // Auto process on file drop/select
+        processImage();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function displayOriginalImage() {
+      emptyPlaceholder.style.display = 'none';
+      canvasContainer.style.display = 'inline-block';
+      mainImage.src = originalImageSrc;
+      overlaysContainer.innerHTML = '';
+      tabDetected.classList.add('active');
+      tabRedacted.classList.remove('active');
+      currentView = 'detected';
+    }
+
+    // Process Image
+    async function processImage() {
+      if (!currentFile) return;
+
+      processBtn.disabled = true;
+      processBtn.innerHTML = '<span class="spinner"></span> Processing on CPU...';
+
+      const formData = new FormData();
+      formData.append('file', currentFile);
+
+      try {
+        const response = await fetch('/process', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'Processing failed');
+        }
+
+        const data = await response.json();
+        currentResults = data.results || [];
+        redactedImageSrc = data.redacted_image_base64;
+
+        statWords.textContent = currentResults.length;
+        statLatency.textContent = `${data.latency_ms} ms`;
+        statsCard.style.display = 'block';
+        resultsCard.style.display = 'block';
+
+        renderWordsList(currentResults);
+        jsonDisplay.textContent = JSON.stringify(currentResults, null, 2);
+
+        // Render bounding boxes once image is rendered
+        if (mainImage.complete) {
+          renderBoundingBoxes();
+        } else {
+          mainImage.onload = renderBoundingBoxes;
+        }
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        processBtn.disabled = false;
+        processBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run OCR & Redaction';
+      }
+    }
+
+    processBtn.addEventListener('click', processImage);
+
+    // Render Bounding Boxes
+    function renderBoundingBoxes() {
+      overlaysContainer.innerHTML = '';
+      if (currentView !== 'detected') return;
+
+      const imgW = mainImage.naturalWidth;
+      const imgH = mainImage.naturalHeight;
+      const dispW = mainImage.clientWidth;
+      const dispH = mainImage.clientHeight;
+
+      const scaleX = dispW / imgW;
+      const scaleY = dispH / imgH;
+
+      currentResults.forEach((item, index) => {
+        const [top, left, bottom, right] = item.bounding_box;
+
+        const box = document.createElement('div');
+        box.className = 'bbox-overlay';
+        box.id = `bbox-${index}`;
+        box.style.top = `${top * scaleY}px`;
+        box.style.left = `${left * scaleX}px`;
+        box.style.width = `${(right - left) * scaleX}px`;
+        box.style.height = `${(bottom - top) * scaleY}px`;
+
+        const label = document.createElement('div');
+        label.className = 'bbox-label';
+        label.textContent = item.word;
+        box.appendChild(label);
+
+        // Sync hover with word list
+        box.addEventListener('mouseenter', () => highlightItem(index));
+        box.addEventListener('mouseleave', () => unhighlightItem(index));
+
+        overlaysContainer.appendChild(box);
+      });
+    }
+
+    window.addEventListener('resize', () => {
+      if (currentView === 'detected') renderBoundingBoxes();
+    });
+
+    // Render Word List
+    function renderWordsList(results) {
+      wordsList.innerHTML = '';
+      results.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'word-row';
+        row.id = `word-row-${index}`;
+        row.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--text-muted); font-size: 0.75rem;">#${index + 1}</span>
+            <span class="word-tag">${item.word || '(blank)'}</span>
+          </div>
+          <span class="bbox-coords">[${item.bounding_box.join(', ')}]</span>
+        `;
+        row.addEventListener('mouseenter', () => highlightItem(index));
+        row.addEventListener('mouseleave', () => unhighlightItem(index));
+        wordsList.appendChild(row);
+      });
+    }
+
+    function highlightItem(index) {
+      const box = document.getElementById(`bbox-${index}`);
+      const row = document.getElementById(`word-row-${index}`);
+      if (box) box.classList.add('highlight');
+      if (row) {
+        row.classList.add('active');
+        row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    function unhighlightItem(index) {
+      const box = document.getElementById(`bbox-${index}`);
+      const row = document.getElementById(`word-row-${index}`);
+      if (box) box.classList.remove('highlight');
+      if (row) row.classList.remove('active');
+    }
+
+    // Tabs Switch
+    tabDetected.addEventListener('click', () => {
+      tabDetected.classList.add('active');
+      tabRedacted.classList.remove('active');
+      currentView = 'detected';
+      mainImage.src = originalImageSrc;
+      overlaysContainer.style.display = 'block';
+      setTimeout(renderBoundingBoxes, 50);
+    });
+
+    tabRedacted.addEventListener('click', () => {
+      if (!redactedImageSrc) {
+        alert('Please run the OCR and Redaction process first.');
+        return;
+      }
+      tabRedacted.classList.add('active');
+      tabDetected.classList.remove('active');
+      currentView = 'redacted';
+      mainImage.src = redactedImageSrc;
+      overlaysContainer.style.display = 'none';
+    });
+
+    // Quick Presets
+    loadDocumentSample.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/sample-image?name=document');
+        const blob = await res.blob();
+        const file = new File([blob], "document_sample.png", { type: "image/png" });
+        handleFileSelect(file);
+      } catch (e) {
+        alert('Could not load document sample.');
+      }
+    });
+
+    loadWordSample.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/sample-image?name=word');
+        const blob = await res.blob();
+        const file = new File([blob], "parking_word.png", { type: "image/png" });
+        handleFileSelect(file);
+      } catch (e) {
+        alert('Could not load word sample.');
+      }
+    });
+
+    // Copy JSON
+    copyJsonBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(jsonDisplay.textContent).then(() => {
+        copyJsonBtn.textContent = 'Copied!';
+        setTimeout(() => copyJsonBtn.textContent = 'Copy JSON', 2000);
+      });
+    });
+
+    // Download JSON
+    downloadJsonBtn.addEventListener('click', () => {
+      const blob = new Blob([jsonDisplay.textContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentFilenameStem}_text.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Download Redacted PNG
+    downloadRedactedBtn.addEventListener('click', () => {
+      if (!redactedImageSrc) return;
+      const a = document.createElement('a');
+      a.href = redactedImageSrc;
+      a.download = `${currentFilenameStem}_redacted.png`;
+      a.click();
+    });
+
+    // Auto-load demo on start
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDocumentSample.click();
+    });
+  </script>
+</body>
+</html>

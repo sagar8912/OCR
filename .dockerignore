@@ -1,0 +1,41 @@
+# Version control & CI
+.git
+.github
+.gitignore
+
+# Python caches & virtual environments
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.venv
+venv
+env
+ENV
+
+# Testing & Coverage
+.pytest_cache
+.coverage
+htmlcov
+tests
+
+# Large datasets & raw archives
+*.zip
+*.csv
+IIIT5K-Word_V3.0/
+
+# Development & Scratch
+notebooks
+scratch
+reports
+*.md
+
+# IDE & Editor files
+.vscode
+.idea
+*.swp
+
+# Secrets & environment configs
+.env*
+*.pem
+*.key

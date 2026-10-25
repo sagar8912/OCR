@@ -1,0 +1,56 @@
+{
+  "WORD_OCR": {
+    "before": {
+      "total_samples": 18,
+      "exact_matches": 1,
+      "exact_accuracy": 5.56,
+      "cer": 32.26,
+      "char_accuracy": 67.74,
+      "avg_edit_distance": 2.222
+    },
+    "after": {
+      "total_samples": 18,
+      "exact_matches": 13,
+      "exact_accuracy": 72.22,
+      "cer": 9.68,
+      "char_accuracy": 90.32,
+      "avg_edit_distance": 0.667
+    }
+  },
+  "NUMERIC_OCR": {
+    "before": {
+      "total_samples": 33,
+      "exact_matches": 2,
+      "exact_accuracy": 6.06,
+      "cer": 76.06,
+      "char_accuracy": 23.94,
+      "avg_edit_distance": 3.273
+    },
+    "after": {
+      "total_samples": 33,
+      "exact_matches": 2,
+      "exact_accuracy": 6.06,
+      "cer": 38.73,
+      "char_accuracy": 61.27,
+      "avg_edit_distance": 1.667
+    }
+  },
+  "IDENTIFIER_OCR": {
+    "before": {
+      "total_samples": 11,
+      "exact_matches": 0,
+      "exact_accuracy": 0.0,
+      "cer": 80.87,
+      "char_accuracy": 19.13,
+      "avg_edit_distance": 8.455
+    },
+    "after": {
+      "total_samples": 11,
+      "exact_matches": 0,
+      "exact_accuracy": 0.0,
+      "cer": 75.65,
+      "char_accuracy": 24.35,
+      "avg_edit_distance": 7.909
+    }
+  }
+}
