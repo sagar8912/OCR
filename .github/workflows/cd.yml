@@ -28,33 +28,10 @@ permissions:
   packages: write # For publishing Docker images to GitHub Container Registry (GHCR)
 
 jobs:
-  pre-deploy-check:
-    name: Verify CI Gate & Deployment Configuration
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
-    outputs:
-      azure_configured: ${{ steps.check-secrets.outputs.configured }}
-    steps:
-      - name: Validate Deployment Prerequisites
-        id: check-secrets
-        run: |
-          echo "Verifying Azure deployment configuration and secrets..."
-          if [ -n "${{ secrets.AZURE_CLIENT_ID }}" ] && [ -n "${{ secrets.AZURE_TENANT_ID }}" ] && [ -n "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-            echo "Azure OIDC federated credentials detected."
-          elif [ -n "${{ secrets.AZURE_CREDENTIALS }}" ]; then
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-            echo "Azure Service Principal credentials detected."
-          else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Azure authentication credentials (AZURE_CLIENT_ID or AZURE_CREDENTIALS) are not yet configured in GitHub Secrets."
-            echo "To complete live automated cloud deployment, configure the Azure secrets outlined in the project documentation."
-          fi
-
   build-and-publish-image:
     name: Build & Push Production Container Image
-    needs: pre-deploy-check
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -94,16 +71,39 @@ jobs:
 
   deploy-to-azure:
     name: Deploy to Azure Container Apps
-    needs: [pre-deploy-check, build-and-publish-image]
-    if: needs.pre-deploy-check.outputs.azure_configured == 'true'
+    needs: [build-and-publish-image]
+    runs-on: ubuntu-latest
     environment:
       name: production
       url: ${{ steps.deploy-aca.outputs.app-url }}
-    runs-on: ubuntu-latest
 
     steps:
+      - name: Validate Azure Deployment Credentials
+        id: auth-check
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        run: |
+          echo "Verifying Azure deployment configuration and credentials..."
+          if [ -n "$AZURE_CLIENT_ID" ] && [ -n "$AZURE_TENANT_ID" ] && [ -n "$AZURE_SUBSCRIPTION_ID" ]; then
+            echo "auth_method=oidc" >> "$GITHUB_OUTPUT"
+            echo "Azure OpenID Connect (OIDC) credentials detected."
+          elif [ -n "$AZURE_CREDENTIALS" ]; then
+            echo "auth_method=sp" >> "$GITHUB_OUTPUT"
+            echo "Azure Service Principal credentials detected."
+          else
+            echo "::error::Missing required Azure deployment credentials in GitHub Secrets!"
+            echo "To deploy to Azure Container Apps, configure either:"
+            echo "  1) OIDC (Recommended): AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID"
+            echo "  2) Service Principal: AZURE_CREDENTIALS"
+            echo "Configure these in GitHub repository or environment ('production') secrets."
+            exit 1
+          fi
+
       - name: Authenticate to Azure via OpenID Connect (OIDC)
-        if: "${{ secrets.AZURE_CLIENT_ID != '' }}"
+        if: steps.auth-check.outputs.auth_method == 'oidc'
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -111,7 +111,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Authenticate to Azure via Service Principal (Fallback)
-        if: "${{ secrets.AZURE_CLIENT_ID == '' && secrets.AZURE_CREDENTIALS != '' }}"
+        if: steps.auth-check.outputs.auth_method == 'sp'
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
